@@ -675,6 +675,8 @@
     fillSettings();
     setupCalculator();
     setupFertCalc();
+    setPestMode('dil');
+    setFertMode('area');
 
     // 네비게이션 (data-go)
     document.addEventListener('click', (e) => {
