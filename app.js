@@ -400,6 +400,27 @@
   }
 
   /* =========================================================
+   *  약/비료 이름별 값 기억 (레시피)
+   * ========================================================= */
+  const LS_RECIPE = 'farm_recipe';
+  function loadRecipes() { try { return JSON.parse(localStorage.getItem(LS_RECIPE) || '{}'); } catch (e) { return {}; } }
+  function saveRecipe(kind, name, data) {
+    name = (name || '').trim();
+    if (!name) return;
+    // 값이 하나라도 있을 때만 저장
+    const hasVal = Object.keys(data).some((k) => data[k] !== '' && data[k] != null);
+    if (!hasVal) return;
+    const all = loadRecipes();
+    all[kind] = all[kind] || {};
+    all[kind][name] = Object.assign(all[kind][name] || {}, data);
+    localStorage.setItem(LS_RECIPE, JSON.stringify(all));
+  }
+  function getRecipe(kind, name) {
+    const all = loadRecipes();
+    return (all[kind] && all[kind][(name || '').trim()]) || null;
+  }
+
+  /* =========================================================
    *  농약 사용량 계산기
    * ========================================================= */
   function fmtMl(ml) {
@@ -455,6 +476,28 @@
     // 저장 후 폼 초기화 시 계산 결과도 비움
     const pForm = document.querySelector('.form[data-sheet="pesticide"]');
     if (pForm) pForm.addEventListener('reset', () => { setTimeout(calcCompute, 0); });
+
+    // 농약명 선택 시, 기억해둔 값 자동 채우기
+    const pName = $('#pName');
+    if (pName) pName.addEventListener('change', () => {
+      const r = getRecipe('pesticide', pName.value);
+      if (!r) return;
+      if (r.dil) { $('#pDilution').value = r.dil; $('#cDil').value = r.dil; }
+      if (r.area) $('#cArea').value = r.area;
+      if (r.per) $('#cPer').value = r.per;
+      if (r.tank) $('#cTank').value = r.tank;
+      calcCompute();
+      toast(pName.value.trim() + ' 저장값을 불러왔습니다.');
+    });
+    // 저장할 때 이 농약의 값 기억
+    if (pForm) pForm.addEventListener('submit', () => {
+      saveRecipe('pesticide', $('#pName').value, {
+        dil: $('#pDilution').value.trim(),
+        area: $('#cArea').value.trim(),
+        per: $('#cPer').value.trim(),
+        tank: $('#cTank').value.trim(),
+      });
+    });
   }
 
   /* =========================================================
@@ -494,15 +537,19 @@
     out.innerHTML = html;
     return { text: fmtMl(fertMl) };
   }
+  function setFertMode(mode) {
+    fMode = mode;
+    const modeBox = $('#fMode');
+    if (modeBox) $$('.calc-mode', modeBox).forEach((b) => b.classList.toggle('is-on', b.dataset.mode === mode));
+    $$('[data-mode-box]').forEach((box) => { box.hidden = box.dataset.modeBox !== mode; });
+    fCompute();
+  }
   function setupFertCalc() {
     const modeBox = $('#fMode');
     if (!modeBox) return;
     modeBox.addEventListener('click', (e) => {
       const btn = e.target.closest('.calc-mode'); if (!btn) return;
-      fMode = btn.dataset.mode;
-      $$('.calc-mode', modeBox).forEach((b) => b.classList.toggle('is-on', b === btn));
-      $$('[data-mode-box]').forEach((box) => { box.hidden = box.dataset.modeBox !== fMode; });
-      fCompute();
+      setFertMode(btn.dataset.mode);
     });
     ['#fArea', '#fPerG', '#fPerL', '#fTank', '#fDil'].forEach((s) => {
       const el = $(s); if (el) el.addEventListener('input', fCompute);
@@ -516,6 +563,32 @@
     });
     const fForm = document.querySelector('.form[data-sheet="fertilizer"]');
     if (fForm) fForm.addEventListener('reset', () => { setTimeout(fCompute, 0); });
+
+    // 비료명 선택 시, 기억해둔 값 자동 채우기
+    const fName = $('#fName');
+    if (fName) fName.addEventListener('change', () => {
+      const r = getRecipe('fertilizer', fName.value);
+      if (!r) return;
+      if (r.mode) setFertMode(r.mode);
+      if (r.area) $('#fArea').value = r.area;
+      if (r.perG) $('#fPerG').value = r.perG;
+      if (r.perL) $('#fPerL').value = r.perL;
+      if (r.tank) $('#fTank').value = r.tank;
+      if (r.dil) $('#fDil').value = r.dil;
+      fCompute();
+      toast(fName.value.trim() + ' 저장값을 불러왔습니다.');
+    });
+    // 저장할 때 이 비료의 값 기억
+    if (fForm) fForm.addEventListener('submit', () => {
+      saveRecipe('fertilizer', $('#fName').value, {
+        mode: fMode,
+        area: $('#fArea').value.trim(),
+        perG: $('#fPerG').value.trim(),
+        perL: $('#fPerL').value.trim(),
+        tank: $('#fTank').value.trim(),
+        dil: $('#fDil').value.trim(),
+      });
+    });
   }
 
   /* =========================================================

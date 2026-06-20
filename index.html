@@ -92,7 +92,7 @@
       <div class="form-head form-head--pest"><span>🧴</span> 농약 사용 기록</div>
       <form class="form" data-sheet="pesticide">
         <label class="fld"><span>사용일</span><input type="date" name="사용일" required /></label>
-        <label class="fld"><span>농약명</span><input type="text" name="농약명" list="dl-농약명" placeholder="예: 다이센엠" /></label>
+        <label class="fld"><span>농약명</span><input type="text" name="농약명" id="pName" list="dl-농약명" placeholder="예: 다이센엠" /></label>
         <label class="fld"><span>희석배수</span><input type="text" name="희석배수" id="pDilution" inputmode="numeric" placeholder="예: 1000 (봉지 표기)" /></label>
 
         <!-- 사용량 계산기 -->
@@ -123,7 +123,7 @@
       <div class="form-head form-head--fert"><span>🌾</span> 비료 사용 기록</div>
       <form class="form" data-sheet="fertilizer">
         <label class="fld"><span>사용일</span><input type="date" name="사용일" required /></label>
-        <label class="fld"><span>비료명</span><input type="text" name="비료명" list="dl-비료명" placeholder="예: 요소비료" /></label>
+        <label class="fld"><span>비료명</span><input type="text" name="비료명" id="fName" list="dl-비료명" placeholder="예: 요소비료" /></label>
 
         <!-- 사용량 계산기 -->
         <div class="calc calc--fert">
