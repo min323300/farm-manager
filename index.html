@@ -93,18 +93,24 @@
       <form class="form" data-sheet="pesticide">
         <label class="fld"><span>사용일</span><input type="date" name="사용일" required /></label>
         <label class="fld"><span>농약명</span><input type="text" name="농약명" id="pName" list="dl-농약명" placeholder="예: 다이센엠" /></label>
-        <label class="fld"><span>희석배수</span><input type="text" name="희석배수" id="pDilution" inputmode="numeric" placeholder="예: 1000 (봉지 표기)" /></label>
 
         <!-- 사용량 계산기 -->
-        <div class="calc">
-          <div class="calc__title">💧 사용량 계산기 <span>ChatGPT가 알려준 값을 넣으세요</span></div>
-          <div class="calc__grid">
-            <label class="fld"><span>살포 면적(평)</span><input type="text" id="cArea" inputmode="decimal" placeholder="예: 300" /></label>
+        <div class="calc calc--pest">
+          <div class="calc__title">💧 사용량 계산기 <span>농약 종류에 맞게 선택하세요</span></div>
+          <div class="calc__modes" id="pMode">
+            <button type="button" class="calc-mode is-on" data-mode="dil">희석 (액체)</button>
+            <button type="button" class="calc-mode" data-mode="gran">알갱이 (입제)</button>
+          </div>
+          <label class="fld"><span>살포 면적(평)</span><input type="text" id="cArea" inputmode="decimal" placeholder="예: 300" /></label>
+          <div class="calc__grid" data-pmode-box="dil">
             <label class="fld"><span>평당 물량(L)</span><input type="text" id="cPer" inputmode="decimal" placeholder="예: 0.5" /></label>
             <label class="fld"><span>약통 용량(L)</span><input type="text" id="cTank" inputmode="decimal" placeholder="예: 25" /></label>
-            <label class="fld"><span>희석배수</span><input type="text" id="cDil" inputmode="numeric" placeholder="위 희석배수와 연동" /></label>
+            <label class="fld"><span>희석배수</span><input type="text" name="희석배수" id="pDilution" inputmode="numeric" placeholder="예: 500" /></label>
           </div>
-          <div class="calc__out" id="cOut">면적과 희석배수를 넣으면 자동 계산됩니다.</div>
+          <div class="calc__grid" data-pmode-box="gran" hidden>
+            <label class="fld"><span>평당 사용량(g)</span><input type="text" id="cPerG" inputmode="decimal" placeholder="예: 10" /></label>
+          </div>
+          <div class="calc__out" id="cOut">면적과 사용 기준을 넣으면 자동 계산됩니다.</div>
           <button type="button" class="btn btn--ghost btn--block" id="cApply">권장량을 사용량에 입력</button>
         </div>
 
