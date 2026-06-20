@@ -430,47 +430,59 @@
   }
   function fmtL(l) { return (Math.round(l * 10) / 10).toLocaleString('ko-KR') + 'L'; }
 
+  let pMode = 'dil';
   function calcCompute() {
-    const area = num($('#cArea').value);
-    const per = num($('#cPer').value);
-    const tank = num($('#cTank').value);
-    const dil = num($('#cDil').value);
     const out = $('#cOut');
+    const area = num($('#cArea').value);
+    if (!area) { out.innerHTML = '면적과 사용 기준을 넣으면 자동 계산됩니다.'; return null; }
 
-    if (!area || !per || !dil) {
-      out.innerHTML = '면적 · 평당 물량 · 희석배수를 넣으면 자동 계산됩니다.';
-      return null;
+    if (pMode === 'gran') {
+      const perG = num($('#cPerG').value);
+      if (!perG) { out.innerHTML = '평당 사용량(g)을 넣으면 계산됩니다.'; return null; }
+      const totalG = area * perG;
+      out.innerHTML = '총 농약량 <b>' + fmtKg(totalG) + '</b>' +
+        '<br><span class="muted">' + area.toLocaleString('ko-KR') + '평 × 평당 ' + perG + 'g</span>';
+      return { text: fmtKg(totalG) };
     }
-    const water = area * per;              // 총 물양 L
+    // 희석 방식
+    const per = num($('#cPer').value), tank = num($('#cTank').value), dil = num($('#pDilution').value);
+    if (!per || !dil) { out.innerHTML = '평당 물량(L)과 희석배수를 넣으면 계산됩니다.'; return null; }
+    const water = area * per;
     const pesticideMl = (water / dil) * 1000;
     let html = '필요한 물 <b>' + fmtL(water) + '</b> · 농약 총 <b>' + fmtMl(pesticideMl) + '</b>';
     const extra = [];
     if (tank) {
-      const perTankMl = (tank / dil) * 1000;
-      const tanks = water / tank;
-      extra.push(tank + 'L 약통당 ' + fmtMl(perTankMl));
-      extra.push('약 ' + (Math.round(tanks * 10) / 10).toLocaleString('ko-KR') + '통 분량');
+      extra.push(tank + 'L 약통당 ' + fmtMl((tank / dil) * 1000));
+      extra.push('약 ' + (Math.round((water / tank) * 10) / 10).toLocaleString('ko-KR') + '통 분량');
     }
     if (extra.length) html += '<br><span class="muted">' + extra.join(' · ') + '</span>';
     out.innerHTML = html;
-    return { water: water, pesticideMl: pesticideMl };
+    return { text: fmtMl(pesticideMl) };
+  }
+
+  function setPestMode(mode) {
+    pMode = mode;
+    const modeBox = $('#pMode');
+    if (modeBox) $$('.calc-mode', modeBox).forEach((b) => b.classList.toggle('is-on', b.dataset.mode === mode));
+    $$('[data-pmode-box]').forEach((box) => { box.hidden = box.dataset.pmodeBox !== mode; });
+    calcCompute();
   }
 
   function setupCalculator() {
-    const pDil = $('#pDilution'), cDil = $('#cDil');
-    // 희석배수 양방향 연동
-    if (pDil && cDil) {
-      pDil.addEventListener('input', () => { cDil.value = pDil.value; calcCompute(); });
-      cDil.addEventListener('input', () => { pDil.value = cDil.value; calcCompute(); });
-    }
-    ['#cArea', '#cPer', '#cTank'].forEach((s) => {
+    const modeBox = $('#pMode');
+    if (!modeBox) return;
+    modeBox.addEventListener('click', (e) => {
+      const btn = e.target.closest('.calc-mode'); if (!btn) return;
+      setPestMode(btn.dataset.mode);
+    });
+    ['#cArea', '#cPer', '#cTank', '#pDilution', '#cPerG'].forEach((s) => {
       const el = $(s); if (el) el.addEventListener('input', calcCompute);
     });
     const apply = $('#cApply');
     if (apply) apply.addEventListener('click', () => {
       const r = calcCompute();
-      if (!r) { toast('면적·희석배수를 먼저 입력하세요.', true); return; }
-      $('#pAmount').value = fmtMl(r.pesticideMl);
+      if (!r) { toast('면적과 사용 기준을 먼저 입력하세요.', true); return; }
+      $('#pAmount').value = r.text;
       toast('권장량을 사용량에 입력했습니다. 실제 양으로 수정 가능합니다.');
     });
     // 저장 후 폼 초기화 시 계산 결과도 비움
@@ -482,20 +494,24 @@
     if (pName) pName.addEventListener('change', () => {
       const r = getRecipe('pesticide', pName.value);
       if (!r) return;
-      if (r.dil) { $('#pDilution').value = r.dil; $('#cDil').value = r.dil; }
+      if (r.mode) setPestMode(r.mode);
+      if (r.dil) $('#pDilution').value = r.dil;
       if (r.area) $('#cArea').value = r.area;
       if (r.per) $('#cPer').value = r.per;
       if (r.tank) $('#cTank').value = r.tank;
+      if (r.perG) $('#cPerG').value = r.perG;
       calcCompute();
       toast(pName.value.trim() + ' 저장값을 불러왔습니다.');
     });
     // 저장할 때 이 농약의 값 기억
     if (pForm) pForm.addEventListener('submit', () => {
       saveRecipe('pesticide', $('#pName').value, {
+        mode: pMode,
         dil: $('#pDilution').value.trim(),
         area: $('#cArea').value.trim(),
         per: $('#cPer').value.trim(),
         tank: $('#cTank').value.trim(),
+        perG: $('#cPerG').value.trim(),
       });
     });
   }
