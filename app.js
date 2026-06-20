@@ -400,6 +400,125 @@
   }
 
   /* =========================================================
+   *  농약 사용량 계산기
+   * ========================================================= */
+  function fmtMl(ml) {
+    if (!ml) return '0ml';
+    if (ml >= 1000) return (Math.round(ml / 10) / 100).toLocaleString('ko-KR') + 'L';
+    return (Math.round(ml * 10) / 10).toLocaleString('ko-KR') + 'ml';
+  }
+  function fmtL(l) { return (Math.round(l * 10) / 10).toLocaleString('ko-KR') + 'L'; }
+
+  function calcCompute() {
+    const area = num($('#cArea').value);
+    const per = num($('#cPer').value);
+    const tank = num($('#cTank').value);
+    const dil = num($('#cDil').value);
+    const out = $('#cOut');
+
+    if (!area || !per || !dil) {
+      out.innerHTML = '면적 · 평당 물량 · 희석배수를 넣으면 자동 계산됩니다.';
+      return null;
+    }
+    const water = area * per;              // 총 물양 L
+    const pesticideMl = (water / dil) * 1000;
+    let html = '필요한 물 <b>' + fmtL(water) + '</b> · 농약 총 <b>' + fmtMl(pesticideMl) + '</b>';
+    const extra = [];
+    if (tank) {
+      const perTankMl = (tank / dil) * 1000;
+      const tanks = water / tank;
+      extra.push(tank + 'L 약통당 ' + fmtMl(perTankMl));
+      extra.push('약 ' + (Math.round(tanks * 10) / 10).toLocaleString('ko-KR') + '통 분량');
+    }
+    if (extra.length) html += '<br><span class="muted">' + extra.join(' · ') + '</span>';
+    out.innerHTML = html;
+    return { water: water, pesticideMl: pesticideMl };
+  }
+
+  function setupCalculator() {
+    const pDil = $('#pDilution'), cDil = $('#cDil');
+    // 희석배수 양방향 연동
+    if (pDil && cDil) {
+      pDil.addEventListener('input', () => { cDil.value = pDil.value; calcCompute(); });
+      cDil.addEventListener('input', () => { pDil.value = cDil.value; calcCompute(); });
+    }
+    ['#cArea', '#cPer', '#cTank'].forEach((s) => {
+      const el = $(s); if (el) el.addEventListener('input', calcCompute);
+    });
+    const apply = $('#cApply');
+    if (apply) apply.addEventListener('click', () => {
+      const r = calcCompute();
+      if (!r) { toast('면적·희석배수를 먼저 입력하세요.', true); return; }
+      $('#pAmount').value = fmtMl(r.pesticideMl);
+      toast('권장량을 사용량에 입력했습니다. 실제 양으로 수정 가능합니다.');
+    });
+    // 저장 후 폼 초기화 시 계산 결과도 비움
+    const pForm = document.querySelector('.form[data-sheet="pesticide"]');
+    if (pForm) pForm.addEventListener('reset', () => { setTimeout(calcCompute, 0); });
+  }
+
+  /* =========================================================
+   *  비료 사용량 계산기 (면적당 / 희석배수 전환)
+   * ========================================================= */
+  function fmtKg(g) {
+    if (!g) return '0g';
+    if (g >= 1000) return (Math.round(g / 10) / 100).toLocaleString('ko-KR') + 'kg';
+    return (Math.round(g * 10) / 10).toLocaleString('ko-KR') + 'g';
+  }
+  let fMode = 'area';
+  function fCompute() {
+    const out = $('#fOut');
+    const area = num($('#fArea').value);
+    if (!area) { out.innerHTML = '면적과 사용 기준을 넣으면 자동 계산됩니다.'; return null; }
+
+    if (fMode === 'area') {
+      const perG = num($('#fPerG').value);
+      if (!perG) { out.innerHTML = '평당 사용량(g)을 넣으면 계산됩니다.'; return null; }
+      const totalG = area * perG;
+      out.innerHTML = '총 비료량 <b>' + fmtKg(totalG) + '</b>' +
+        '<br><span class="muted">' + area.toLocaleString('ko-KR') + '평 × 평당 ' + perG + 'g</span>';
+      return { text: fmtKg(totalG) };
+    }
+    // 희석배수 방식
+    const perL = num($('#fPerL').value), tank = num($('#fTank').value), dil = num($('#fDil').value);
+    if (!perL || !dil) { out.innerHTML = '평당 물량(L)과 희석배수를 넣으면 계산됩니다.'; return null; }
+    const water = area * perL;
+    const fertMl = (water / dil) * 1000;
+    let html = '필요한 물 <b>' + fmtL(water) + '</b> · 비료 총 <b>' + fmtMl(fertMl) + '</b>';
+    const extra = [];
+    if (tank) {
+      extra.push(tank + 'L 약통당 ' + fmtMl((tank / dil) * 1000));
+      extra.push('약 ' + (Math.round((water / tank) * 10) / 10).toLocaleString('ko-KR') + '통 분량');
+    }
+    if (extra.length) html += '<br><span class="muted">' + extra.join(' · ') + '</span>';
+    out.innerHTML = html;
+    return { text: fmtMl(fertMl) };
+  }
+  function setupFertCalc() {
+    const modeBox = $('#fMode');
+    if (!modeBox) return;
+    modeBox.addEventListener('click', (e) => {
+      const btn = e.target.closest('.calc-mode'); if (!btn) return;
+      fMode = btn.dataset.mode;
+      $$('.calc-mode', modeBox).forEach((b) => b.classList.toggle('is-on', b === btn));
+      $$('[data-mode-box]').forEach((box) => { box.hidden = box.dataset.modeBox !== fMode; });
+      fCompute();
+    });
+    ['#fArea', '#fPerG', '#fPerL', '#fTank', '#fDil'].forEach((s) => {
+      const el = $(s); if (el) el.addEventListener('input', fCompute);
+    });
+    const apply = $('#fApply');
+    if (apply) apply.addEventListener('click', () => {
+      const r = fCompute();
+      if (!r) { toast('면적과 사용 기준을 먼저 입력하세요.', true); return; }
+      $('#fAmount').value = r.text;
+      toast('권장량을 사용량에 입력했습니다. 실제 양으로 수정 가능합니다.');
+    });
+    const fForm = document.querySelector('.form[data-sheet="fertilizer"]');
+    if (fForm) fForm.addEventListener('reset', () => { setTimeout(fCompute, 0); });
+  }
+
+  /* =========================================================
    *  설정
    * ========================================================= */
   function fillSettings() {
@@ -465,6 +584,8 @@
     renderAC();
     applyModeChip();
     fillSettings();
+    setupCalculator();
+    setupFertCalc();
 
     // 네비게이션 (data-go)
     document.addEventListener('click', (e) => {

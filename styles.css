@@ -168,6 +168,39 @@ input[type="date"], input[type="month"] { -webkit-appearance: none; appearance: 
 .chip:active { transform: scale(.95); }
 .chip.is-on { background: var(--field); border-color: var(--field); color: #fff; }
 
+/* ---------- 사용량 계산기 ---------- */
+.calc {
+  background: #fff4ec; border: 1.5px solid #f0c9ad; border-radius: var(--radius);
+  padding: 14px; display: flex; flex-direction: column; gap: 12px;
+}
+.calc__title { font-size: 16px; font-weight: 800; color: var(--c-pest); }
+.calc__title span { display: block; font-size: 12.5px; font-weight: 600; color: #a9613a; margin-top: 2px; }
+.calc__grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.calc__grid .fld > span { font-size: 13px; }
+.calc__out {
+  background: #fff; border: 1px solid #f0c9ad; border-radius: 10px;
+  padding: 12px; font-size: 15px; line-height: 1.7; color: var(--soil);
+}
+.calc__out b { color: var(--c-pest); font-size: 17px; }
+.calc__out .muted { color: var(--soil-soft); font-size: 13.5px; }
+
+/* 비료 계산기 색상 */
+.calc--fert { background: #f4efe6; border-color: #d8c3a3; }
+.calc--fert .calc__title { color: var(--c-fert); }
+.calc--fert .calc__title span { color: #8a6a3a; }
+.calc--fert .calc__out { border-color: #d8c3a3; }
+.calc--fert .calc__out b { color: var(--c-fert); }
+
+/* 모드 전환 버튼 */
+.calc__modes { display: flex; gap: 8px; }
+.calc-mode {
+  flex: 1; min-height: 46px; padding: 8px 10px;
+  font-size: 15px; font-weight: 700; font-family: inherit;
+  background: #fff; color: var(--soil-soft);
+  border: 1.5px solid var(--line); border-radius: 10px; cursor: pointer;
+}
+.calc-mode.is-on { background: var(--c-fert); border-color: var(--c-fert); color: #fff; }
+
 /* ---------- 저장 버튼 ---------- */
 .save {
   margin-top: 6px; width: 100%; min-height: 58px;

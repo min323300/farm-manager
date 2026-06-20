@@ -93,8 +93,22 @@
       <form class="form" data-sheet="pesticide">
         <label class="fld"><span>사용일</span><input type="date" name="사용일" required /></label>
         <label class="fld"><span>농약명</span><input type="text" name="농약명" list="dl-농약명" placeholder="예: 다이센엠" /></label>
-        <label class="fld"><span>사용량</span><input type="text" name="사용량" placeholder="예: 500ml" /></label>
-        <label class="fld"><span>희석배수</span><input type="text" name="희석배수" placeholder="예: 1000배" /></label>
+        <label class="fld"><span>희석배수</span><input type="text" name="희석배수" id="pDilution" inputmode="numeric" placeholder="예: 1000 (봉지 표기)" /></label>
+
+        <!-- 사용량 계산기 -->
+        <div class="calc">
+          <div class="calc__title">💧 사용량 계산기 <span>ChatGPT가 알려준 값을 넣으세요</span></div>
+          <div class="calc__grid">
+            <label class="fld"><span>살포 면적(평)</span><input type="text" id="cArea" inputmode="decimal" placeholder="예: 300" /></label>
+            <label class="fld"><span>평당 물량(L)</span><input type="text" id="cPer" inputmode="decimal" placeholder="예: 0.5" /></label>
+            <label class="fld"><span>약통 용량(L)</span><input type="text" id="cTank" inputmode="decimal" placeholder="예: 25" /></label>
+            <label class="fld"><span>희석배수</span><input type="text" id="cDil" inputmode="numeric" placeholder="위 희석배수와 연동" /></label>
+          </div>
+          <div class="calc__out" id="cOut">면적과 희석배수를 넣으면 자동 계산됩니다.</div>
+          <button type="button" class="btn btn--ghost btn--block" id="cApply">권장량을 사용량에 입력</button>
+        </div>
+
+        <label class="fld"><span>사용량 (실제 사용한 양)</span><input type="text" name="사용량" id="pAmount" placeholder="계산값이 들어오면 실제 양으로 수정하세요" /></label>
         <label class="fld"><span>사용구역</span><input type="text" name="사용구역" list="dl-필지" placeholder="예: 1번 하우스" /></label>
         <label class="fld"><span>작업자</span><input type="text" name="작업자" list="dl-작업자" /></label>
         <label class="fld"><span>특이사항</span><textarea name="특이사항" rows="2" placeholder="선택 입력"></textarea></label>
@@ -110,7 +124,28 @@
       <form class="form" data-sheet="fertilizer">
         <label class="fld"><span>사용일</span><input type="date" name="사용일" required /></label>
         <label class="fld"><span>비료명</span><input type="text" name="비료명" list="dl-비료명" placeholder="예: 요소비료" /></label>
-        <label class="fld"><span>사용량</span><input type="text" name="사용량" placeholder="예: 20kg" /></label>
+
+        <!-- 사용량 계산기 -->
+        <div class="calc calc--fert">
+          <div class="calc__title">🧮 사용량 계산기 <span>비료 종류에 맞게 선택하세요</span></div>
+          <div class="calc__modes" id="fMode">
+            <button type="button" class="calc-mode is-on" data-mode="area">알갱이 (면적당)</button>
+            <button type="button" class="calc-mode" data-mode="dil">액체 (희석배수)</button>
+          </div>
+          <label class="fld"><span>살포 면적(평)</span><input type="text" id="fArea" inputmode="decimal" placeholder="예: 300" /></label>
+          <div class="calc__grid" data-mode-box="area">
+            <label class="fld"><span>평당 사용량(g)</span><input type="text" id="fPerG" inputmode="decimal" placeholder="예: 100" /></label>
+          </div>
+          <div class="calc__grid" data-mode-box="dil" hidden>
+            <label class="fld"><span>평당 물량(L)</span><input type="text" id="fPerL" inputmode="decimal" placeholder="예: 0.5" /></label>
+            <label class="fld"><span>약통 용량(L)</span><input type="text" id="fTank" inputmode="decimal" placeholder="예: 25" /></label>
+            <label class="fld"><span>희석배수</span><input type="text" id="fDil" inputmode="numeric" placeholder="예: 1000" /></label>
+          </div>
+          <div class="calc__out" id="fOut">면적과 사용 기준을 넣으면 자동 계산됩니다.</div>
+          <button type="button" class="btn btn--ghost btn--block" id="fApply">권장량을 사용량에 입력</button>
+        </div>
+
+        <label class="fld"><span>사용량 (실제 사용한 양)</span><input type="text" name="사용량" id="fAmount" placeholder="계산값이 들어오면 실제 양으로 수정하세요" /></label>
         <label class="fld"><span>사용구역</span><input type="text" name="사용구역" list="dl-필지" /></label>
         <label class="fld"><span>작업자</span><input type="text" name="작업자" list="dl-작업자" /></label>
         <label class="fld"><span>특이사항</span><textarea name="특이사항" rows="2" placeholder="선택 입력"></textarea></label>
