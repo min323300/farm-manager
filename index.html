@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="theme-color" content="#2f6b3c" />
+  <title>농장 관리</title>
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+  <!-- 상단 바 -->
+  <header class="appbar">
+    <button class="appbar__back" id="backBtn" aria-label="홈으로" hidden>‹</button>
+    <div class="appbar__title">
+      <span class="appbar__mark">🌱</span>
+      <span id="appTitle">우리 농장</span>
+    </div>
+    <span class="appbar__status" id="modeChip">로컬</span>
+  </header>
+
+  <main class="screen" id="screen">
+
+    <!-- ============ 홈 ============ -->
+    <section class="view view--active" id="view-home">
+      <div class="banner" id="setupBanner" hidden>
+        <strong>아직 클라우드에 연결되지 않았습니다.</strong>
+        <p>지금은 이 기기에만 저장되는 <b>로컬 모드</b>입니다. 구글 시트에 저장하려면 설정에서 연결하세요.</p>
+        <button class="banner__btn" data-go="settings">연결 설정 열기</button>
+      </div>
+
+      <div class="today">
+        <h2 class="today__label">오늘 <span id="todayDate"></span></h2>
+        <div class="today__grid">
+          <div class="today__stat"><b id="sumWorkToday">0</b><span>오늘 작업</span></div>
+          <div class="today__stat"><b id="sumHarvestMonth">0</b><span>이달 수확건</span></div>
+          <div class="today__stat"><b id="sumCostMonth">0</b><span>이달 비용(원)</span></div>
+        </div>
+      </div>
+
+      <h3 class="section-label">기록하기</h3>
+      <div class="tiles">
+        <button class="tile tile--work" data-go="worklog">
+          <span class="tile__icon">📋</span><span class="tile__name">작업일지</span>
+        </button>
+        <button class="tile tile--pest" data-go="pesticide">
+          <span class="tile__icon">🧴</span><span class="tile__name">농약</span>
+        </button>
+        <button class="tile tile--fert" data-go="fertilizer">
+          <span class="tile__icon">🌾</span><span class="tile__name">비료</span>
+        </button>
+        <button class="tile tile--harv" data-go="harvest">
+          <span class="tile__icon">🧺</span><span class="tile__name">수확</span>
+        </button>
+        <button class="tile tile--cost" data-go="cost">
+          <span class="tile__icon">💰</span><span class="tile__name">비용</span>
+        </button>
+        <button class="tile tile--stat" data-go="stats">
+          <span class="tile__icon">📊</span><span class="tile__name">통계</span>
+        </button>
+      </div>
+
+      <h3 class="section-label">최근 기록</h3>
+      <ul class="feed" id="homeFeed"><li class="feed__empty">아직 기록이 없습니다.</li></ul>
+    </section>
+
+    <!-- ============ 작업일지 ============ -->
+    <section class="view" id="view-worklog">
+      <div class="form-head form-head--work"><span>📋</span> 작업일지 기록</div>
+      <form class="form" data-sheet="worklog">
+        <label class="fld"><span>날짜</span><input type="date" name="날짜" required /></label>
+        <label class="fld"><span>필지 / 구역</span><input type="text" name="필지" list="dl-필지" placeholder="예: 1번 하우스" /></label>
+        <label class="fld"><span>작물</span><input type="text" name="작물" list="dl-작물" placeholder="예: 토마토" /></label>
+        <div class="fld">
+          <span>작업종류</span>
+          <div class="chips" data-target="작업종류" data-items="정식,파종,관수,제초,시비,농약살포,수확,기타"></div>
+          <input type="hidden" name="작업종류" />
+        </div>
+        <label class="fld"><span>작업자</span><input type="text" name="작업자" list="dl-작업자" placeholder="예: 홍길동" /></label>
+        <label class="fld"><span>작업시간</span><input type="text" name="작업시간" inputmode="decimal" placeholder="예: 3시간 / 오전" /></label>
+        <label class="fld"><span>특이사항</span><textarea name="특이사항" rows="2" placeholder="선택 입력"></textarea></label>
+        <button type="submit" class="save save--work">저장하기</button>
+      </form>
+      <h3 class="section-label">최근 작업일지</h3>
+      <ul class="feed" data-list="worklog"></ul>
+    </section>
+
+    <!-- ============ 농약 ============ -->
+    <section class="view" id="view-pesticide">
+      <div class="form-head form-head--pest"><span>🧴</span> 농약 사용 기록</div>
+      <form class="form" data-sheet="pesticide">
+        <label class="fld"><span>사용일</span><input type="date" name="사용일" required /></label>
+        <label class="fld"><span>농약명</span><input type="text" name="농약명" list="dl-농약명" placeholder="예: 다이센엠" /></label>
+        <label class="fld"><span>사용량</span><input type="text" name="사용량" placeholder="예: 500ml" /></label>
+        <label class="fld"><span>희석배수</span><input type="text" name="희석배수" placeholder="예: 1000배" /></label>
+        <label class="fld"><span>사용구역</span><input type="text" name="사용구역" list="dl-필지" placeholder="예: 1번 하우스" /></label>
+        <label class="fld"><span>작업자</span><input type="text" name="작업자" list="dl-작업자" /></label>
+        <label class="fld"><span>특이사항</span><textarea name="특이사항" rows="2" placeholder="선택 입력"></textarea></label>
+        <button type="submit" class="save save--pest">저장하기</button>
+      </form>
+      <h3 class="section-label">최근 농약 기록</h3>
+      <ul class="feed" data-list="pesticide"></ul>
+    </section>
+
+    <!-- ============ 비료 ============ -->
+    <section class="view" id="view-fertilizer">
+      <div class="form-head form-head--fert"><span>🌾</span> 비료 사용 기록</div>
+      <form class="form" data-sheet="fertilizer">
+        <label class="fld"><span>사용일</span><input type="date" name="사용일" required /></label>
+        <label class="fld"><span>비료명</span><input type="text" name="비료명" list="dl-비료명" placeholder="예: 요소비료" /></label>
+        <label class="fld"><span>사용량</span><input type="text" name="사용량" placeholder="예: 20kg" /></label>
+        <label class="fld"><span>사용구역</span><input type="text" name="사용구역" list="dl-필지" /></label>
+        <label class="fld"><span>작업자</span><input type="text" name="작업자" list="dl-작업자" /></label>
+        <label class="fld"><span>특이사항</span><textarea name="특이사항" rows="2" placeholder="선택 입력"></textarea></label>
+        <button type="submit" class="save save--fert">저장하기</button>
+      </form>
+      <h3 class="section-label">최근 비료 기록</h3>
+      <ul class="feed" data-list="fertilizer"></ul>
+    </section>
+
+    <!-- ============ 수확 ============ -->
+    <section class="view" id="view-harvest">
+      <div class="form-head form-head--harv"><span>🧺</span> 수확 기록</div>
+      <form class="form" data-sheet="harvest">
+        <label class="fld"><span>수확일</span><input type="date" name="수확일" required /></label>
+        <label class="fld"><span>품목</span><input type="text" name="품목" list="dl-품목" placeholder="예: 토마토" /></label>
+        <label class="fld"><span>수확량</span><input type="text" name="수확량" inputmode="decimal" placeholder="예: 120" /></label>
+        <div class="fld">
+          <span>단위</span>
+          <div class="chips" data-target="단위" data-items="kg,박스,망,단,개,포"></div>
+          <input type="hidden" name="단위" />
+        </div>
+        <div class="fld">
+          <span>등급</span>
+          <div class="chips" data-target="등급" data-items="특,상,중,하"></div>
+          <input type="hidden" name="등급" />
+        </div>
+        <label class="fld"><span>판매처</span><input type="text" name="판매처" list="dl-판매처" placeholder="예: 공판장" /></label>
+        <label class="fld"><span>판매금액(원)</span><input type="text" name="판매금액" inputmode="numeric" placeholder="예: 350000" /></label>
+        <button type="submit" class="save save--harv">저장하기</button>
+      </form>
+      <h3 class="section-label">최근 수확 기록</h3>
+      <ul class="feed" data-list="harvest"></ul>
+    </section>
+
+    <!-- ============ 비용 ============ -->
+    <section class="view" id="view-cost">
+      <div class="form-head form-head--cost"><span>💰</span> 비용 기록</div>
+      <form class="form" data-sheet="cost">
+        <label class="fld"><span>날짜</span><input type="date" name="날짜" required /></label>
+        <div class="fld">
+          <span>비용구분</span>
+          <div class="chips" data-target="비용구분" data-items="종자,비료,농약,인건비,기계유지비,기타"></div>
+          <input type="hidden" name="비용구분" />
+        </div>
+        <label class="fld"><span>금액(원)</span><input type="text" name="금액" inputmode="numeric" placeholder="예: 50000" required /></label>
+        <label class="fld"><span>내용</span><input type="text" name="내용" placeholder="예: 일용직 2명" /></label>
+        <label class="fld"><span>비고</span><input type="text" name="비고" placeholder="선택 입력" /></label>
+        <button type="submit" class="save save--cost">저장하기</button>
+      </form>
+      <h3 class="section-label">최근 비용 기록</h3>
+      <ul class="feed" data-list="cost"></ul>
+    </section>
+
+    <!-- ============ 통계 ============ -->
+    <section class="view" id="view-stats">
+      <div class="form-head form-head--stat"><span>📊</span> 월별 통계</div>
+      <label class="fld fld--inline"><span>조회 월</span><input type="month" id="statMonth" /></label>
+
+      <div class="stat-cards" id="statCards"></div>
+
+      <h3 class="section-label">비용 구분별</h3>
+      <ul class="bars" id="costBars"></ul>
+
+      <h3 class="section-label">품목별 수확</h3>
+      <ul class="bars" id="harvBars"></ul>
+    </section>
+
+    <!-- ============ 설정 ============ -->
+    <section class="view" id="view-settings">
+      <div class="form-head form-head--set"><span>⚙️</span> 설정</div>
+
+      <div class="card">
+        <h3 class="card__title">농장 이름</h3>
+        <input type="text" id="cfgFarm" class="cfg-input" placeholder="우리 농장" />
+      </div>
+
+      <div class="card">
+        <h3 class="card__title">구글 시트 연결</h3>
+        <p class="card__desc">Apps Script 웹앱 주소(/exec)와 토큰을 입력하면 구글 시트에 저장됩니다. 비워 두면 이 기기에만 저장됩니다.</p>
+        <label class="cfg-label">웹앱 URL</label>
+        <input type="url" id="cfgUrl" class="cfg-input" placeholder="https://script.google.com/macros/s/.../exec" />
+        <label class="cfg-label">토큰(선택)</label>
+        <input type="text" id="cfgToken" class="cfg-input" placeholder="GAS에 설정한 토큰" />
+        <div class="cfg-actions">
+          <button class="btn btn--ghost" id="btnTest">연결 테스트</button>
+          <button class="btn btn--primary" id="btnSaveCfg">저장</button>
+        </div>
+        <button class="btn btn--block" id="btnInit">시트 초기화(처음 1회)</button>
+        <p class="cfg-msg" id="cfgMsg"></p>
+      </div>
+
+      <div class="card">
+        <h3 class="card__title">데이터 내보내기</h3>
+        <p class="card__desc">모든 기록을 엑셀(.xlsx) 파일로 내려받습니다.</p>
+        <button class="btn btn--block btn--primary" id="btnExcel">엑셀 다운로드</button>
+      </div>
+
+      <p class="version">농장 관리 v1.0</p>
+    </section>
+
+  </main>
+
+  <!-- 하단 네비게이션 -->
+  <nav class="tabbar">
+    <button class="tab tab--active" data-go="home"><span>🏠</span>홈</button>
+    <button class="tab" data-go="stats"><span>📊</span>통계</button>
+    <button class="tab" id="tabExcel"><span>⬇️</span>다운로드</button>
+    <button class="tab" data-go="settings"><span>⚙️</span>설정</button>
+  </nav>
+
+  <!-- 토스트 -->
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <!-- 자동완성용 datalist -->
+  <datalist id="dl-필지"></datalist>
+  <datalist id="dl-작물"></datalist>
+  <datalist id="dl-작업자"></datalist>
+  <datalist id="dl-농약명"></datalist>
+  <datalist id="dl-비료명"></datalist>
+  <datalist id="dl-품목"></datalist>
+  <datalist id="dl-판매처"></datalist>
+
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
